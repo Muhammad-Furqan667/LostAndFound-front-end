@@ -1,0 +1,239 @@
+.app {
+  font-family: "Poppins", sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: #fafafa;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1rem 5%;
+  background-color: rgba(248, 249, 250, 0.98);
+  border-bottom: 0.1rem solid #ccc;
+  position: relative; /* needed for absolute centering */
+  box-sizing: border-box;
+}
+
+/* CENTER: truly centered */
+.center-header {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.found-container h2 {
+  margin: 0; /* remove extra spacing */
+  text-align: center;
+}
+
+/* LEFT: MENU */
+.menu-box {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.menu-header {
+  background-color: #6d9ffc;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.6rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.menu-header:hover {
+  background-color: #1b4ea5;
+}
+
+/* Dropdown */
+.menu-options {
+  position: absolute;
+  top: 120%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  background-color: #fff;
+  border: 0.1rem solid #ddd;
+  border-radius: 0.6rem;
+  padding: 0.3rem;
+  width: 6rem;
+  box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.menu-options button {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+  border-radius: 0.4rem;
+  transition: background-color 0.3s ease;
+}
+
+.menu-options button:hover {
+  background-color: #f2f2f2;
+}
+
+/* CENTER: LOGO + REPORT BUTTON */
+.center-header {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: royalblue;
+  white-space: nowrap;
+}
+
+.report-btn-header {
+  padding: 0.6rem 1.2rem;
+  background-color: royalblue;
+  color: white;
+  border: none;
+  border-radius: 0.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.report-btn-header:hover {
+  background-color: #1a4dbb;
+}
+
+.search-containe {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  position: relative; /* needed for absolute input positioning */
+}
+
+.search-container.collapsed {
+  width: 0;
+  overflow: visible;
+}
+
+.search-container.expanded {
+  width: auto;
+}
+.search-icon {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+/* Floating search input */
+.search-popup {
+  position: relative;
+}
+
+.search-popup input {
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateY(-50%);
+  padding: 0.3rem 0.5rem;
+  border: 1px solid gray;
+  border-radius: 0.3rem;
+  font-size: 0.8rem;
+  width: 120px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Dropdown style */
+.sort-container select {
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 0.1rem solid gray;
+  font-size: 0.75rem;
+  /* width: 70px; */
+}
+
+/* Sort dropdown */
+.sort-container select {
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  border: 0.1rem solid gray;
+  font-size: 0.75rem;
+  width: 70px;
+  transition: width 0.3s ease;
+}
+
+/* Responsive behavior */
+@media (max-width: 50px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .center-header {
+    justify-content: center;
+  }
+
+  .search-container {
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .search-container input,
+  .sort-container select {
+    width: 10%;
+    max-width: 50px;
+  }
+}
+
+/* ITEMS GRID (Lost page)  */
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(25%, 1fr));
+  gap: 2rem;
+  justify-content: center;
+  padding: 2rem 8%;
+}
+
+.item-card {
+  background-color: #fff;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0.3rem 0.8rem rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  text-align: center;
+}
+
+.item-card img {
+  width: 100%;
+  height: 12rem;
+  object-fit: cover;
+  border-radius: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.item-card:hover {
+  transform: translateY(-0.3rem);
+}
