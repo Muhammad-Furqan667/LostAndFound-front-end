@@ -15,6 +15,7 @@ import SignUp from "./SignUp.jsx";
 import Login from "./Login.jsx";
 import Profile from "./Profile.jsx";
 import Loader from "./loader.jsx";
+import Toast from "./Toast.jsx";
 import { isAuthenticated, getUser, logout as authLogout } from "../lib/authService.js";
 import "./../Styling/App.css";
 const images = import.meta.glob("./assets/*.{png,jpg,jpeg}", {
@@ -38,8 +39,17 @@ export default function App() {
   const [loader, setLoader] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "", show: false });
   const menuRef = useRef(null);
   const searchRef = useRef(null);
+
+  const showToast = (message, type = "error") => {
+    setToast({ message, type, show: true });
+  };
+
+  const closeToast = () => {
+    setToast({ ...toast, show: false });
+  };
 
   // Check authentication status on mount
   useEffect(() => {
@@ -70,7 +80,7 @@ export default function App() {
 
   const fetchLostItems = async () => {
     try {
-      // setLoader(true);
+      setLoader(true);
       const res = await fetch(`${BASE_URL}/api/lost`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -85,7 +95,7 @@ export default function App() {
         type: "lost",
       }));
       setLostProject(lostWithType);
-      // setLoader(false);
+      setLoader(false);
     } catch (err) {
       console.error("Error fetching lost items:", err);
     }
@@ -93,7 +103,7 @@ export default function App() {
 
   const fetchFoundItems = async () => {
     try {
-      // setLoader(true);
+      setLoader(true);
       const res = await fetch(`${BASE_URL}/api/found`);
 
       if (!res.ok) {
@@ -108,7 +118,7 @@ export default function App() {
       }));
 
       setFoundItem(lostWithType);
-      // setLoader(false);
+      setLoader(false);
     } catch (err) {
       console.error("Error fetching found items:", err);
     }
@@ -132,7 +142,7 @@ export default function App() {
   const handleReportClick = () => {
     // Check if user is logged in before allowing report
     if (!isLoggedIn) {
-      alert("Please login to report items");
+      showToast("Please login to report items", "error");
       navigate("/login");
       return;
     }
@@ -153,7 +163,14 @@ export default function App() {
 
   return (
     <>
-      {/* {loader && <Loader />} */}
+      {loader && <Loader />}
+      {toast.show && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={closeToast}
+        />
+      )}
       <header className="header">
         <div className="menu-box" ref={menuRef}>
           <div className="menu-header" onClick={() => setMenuOpen(!menuOpen)}>
@@ -314,6 +331,7 @@ export default function App() {
               projects={lostItem}
               item={item}
               isLoggedIn={isLoggedIn}
+              showToast={showToast}
             />
           }
         />
@@ -326,6 +344,7 @@ export default function App() {
               projects={FoundItem}
               item={item}
               isLoggedIn={isLoggedIn}
+              showToast={showToast}
             />
           }
         />
@@ -346,15 +365,16 @@ export default function App() {
               item={item == "Report Lost Item" ? "Lost" : "Found"}
               fetchLostItems={fetchLostItems}
               fetchFoundItems={fetchFoundItems}
+              showToast={showToast}
             />
           }
         />
         <Route path="/contact" element={<InfoPage title="Contact Us" />} />
         <Route path="/about" element={<InfoPage title="About Us" />} />
         <Route path="/help" element={<InfoPage title="Help Center" />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
-        <Route path="/profile" element={<Profile onLogout={handleLogout} />} />
+        <Route path="/signup" element={<SignUp showToast={showToast} />} />
+        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} showToast={showToast} />} />
+        <Route path="/profile" element={<Profile onLogout={handleLogout} showToast={showToast} />} />
       </Routes>
     </>
   );

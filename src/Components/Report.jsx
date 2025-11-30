@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Loader from "./loader";
 import { getToken } from "../lib/authService";
 import "./../Styling/found.css";
+import bag from "./../assets/bag.jpeg";
 const BASE_URL = "https://lostandfound-backend-production-634d.up.railway.app";
 
 const fileToDataUrl = (file) =>
@@ -16,7 +17,7 @@ const fileToDataUrl = (file) =>
 
 ////////////////////
 /////////////
-function Report({ item, fetchLostItems, fetchFoundItems }) {
+function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
   const [formData, setFormData] = useState({
     // removed added_by - will be auto-populated from JWT token
     contact: "",
@@ -64,6 +65,16 @@ function Report({ item, fetchLostItems, fetchFoundItems }) {
 
     if (formData.image) {
       form.append("imageURL", formData.image);
+    } else if (formData.Category.toLowerCase() === 'others') {
+      // If Category is Others and no image, use the bag image
+      try {
+        const response = await fetch(bag);
+        const blob = await response.blob();
+        const file = new File([blob], "bag.jpeg", { type: "image/jpeg" });
+        form.append("imageURL", file);
+      } catch (error) {
+        console.error('Error loading default bag image:', error);
+      }
     }
 
     const endpoint = item.toLowerCase() === "lost" ? "lost" : "found";
@@ -71,7 +82,7 @@ function Report({ item, fetchLostItems, fetchFoundItems }) {
 
     if (!token) {
       setLoader(false);
-      alert("You must be logged in to report items. Please login.");
+      showToast("You must be logged in to report items. Please login.", "error");
       return;
     }
 
@@ -88,29 +99,29 @@ function Report({ item, fetchLostItems, fetchFoundItems }) {
 
       if (res.status === 401) {
         setLoader(false);
-        alert("Your session has expired. Please login again.");
+        showToast("Your session has expired. Please login again.", "error");
         return;
       }
 
-      if (!res.ok || data.error) {
+      if (!res.ok) {
         setLoader(false);
-        alert("Error adding item: " + (data.error || "Unknown error"));
+        showToast("Error adding item: " + (data.error || "Unknown error"), "error");
         return;
       }
 
       setLoader(false);
-      alert("Item added successfully!");
-      navigate(-1);
-    } catch (error) {
+      showToast("Item added successfully!", "success");
+      refreshItems();
+      navigate(item.toLowerCase() === "lost" ? "/lost" : "/found");
+    } catch (err) {
       setLoader(false);
-      console.error("Error:", error);
-      alert("Failed to connect to server. Please try again.");
+      showToast("Failed to connect to server. Please try again.", "error");
+      console.error("Error adding item:", err);
     }
   };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
-    console.log(formData);
 
     setFormData({
       ...formData,
@@ -120,21 +131,23 @@ function Report({ item, fetchLostItems, fetchFoundItems }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (submitting) return;
+
     setSubmitting(true);
+    setLoader(true);
 
-    try {
-      setLoader(true);
-      // Always use local backend API
-      await handleApiSubmit();
-
-    } catch (err) {
-      console.error("Error submitting item:", err);
-      alert("Failed to connect to backend.");
-    } finally {
+    // Basic validation
+    if (!formData.name || !formData.description || !formData.location || !formData.Category) {
+      setLoader(false);
       setSubmitting(false);
+      showToast("Please fill in all required fields.", "error");
+      return;
     }
-  };
 
+    await handleApiSubmit();
+    setSubmitting(false);
+  };
   return (
     <>
       {loader && <Loader />}
@@ -189,16 +202,16 @@ function Report({ item, fetchLostItems, fetchFoundItems }) {
               required
             >
               <option value="">Select Category</option>
-              <option>Watch</option>
-              <option>Wallet</option>
-              <option>Phone</option>
-              <option>Jacket</option>
-              <option>Shirt</option>
-              <option>Bag</option>
-              <option>Laptop</option>
-              <option>Cap</option>
-              <option>Card</option>
-              <option>Others</option>
+              <option value="Watch">Watch</option>
+              <option value="Wallet">Wallet</option>
+              <option value="Phone">Phone</option>
+              <option value="Jacket">Jacket</option>
+              <option value="Shirt">Shirt</option>
+              <option value="Bag">Bag</option>
+              <option value="Laptop">Laptop</option>
+              <option value="Cap">Cap</option>
+              <option value="Card">Card</option>
+              <option value="Others">Others</option>
             </select>
           </label>
           <label>

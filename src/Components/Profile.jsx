@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { logout, getUser } from "../lib/authService";
 import "../Styling/details.css";
 
-export default function Profile({ onLogout }) {
+export default function Profile({ onLogout, showToast }) {
   const navigate = useNavigate();
   const user = getUser();
 

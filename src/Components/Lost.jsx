@@ -26,7 +26,7 @@ function sortProjects(projects, sort) {
   return arr;
 }
 
-function Lost({ search, sortOrder, projects, item, isLoggedIn }) {
+function Lost({ search, sortOrder, projects, item, isLoggedIn, showToast }) {
   const navigate = useNavigate();
 
   const filteredProjects = sortProjects(
@@ -38,7 +38,7 @@ function Lost({ search, sortOrder, projects, item, isLoggedIn }) {
 
   const handleReportClick = () => {
     if (!isLoggedIn) {
-      alert("You must be logged in to report items. Please login.");
+      showToast("You must be logged in to report items. Please login.", "error");
       navigate("/login");
       return;
     }

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { login } from "../lib/authService";
 import "../Styling/details.css";
 
-export default function Login({ onLoginSuccess }) {
+export default function Login({ onLoginSuccess, showToast }) {
   const [formData, setFormData] = useState({
     reg_no: "",
     password: "",
@@ -26,7 +26,7 @@ export default function Login({ onLoginSuccess }) {
       const result = await login(formData.reg_no, formData.password);
 
       if (result.success) {
-        setStatus("Login successful! Redirecting...");
+        showToast("Login successful! Redirecting...", "success");
         
         // Notify parent component about successful login
         if (onLoginSuccess) {
@@ -38,11 +38,10 @@ export default function Login({ onLoginSuccess }) {
           navigate("/lost");
         }, 1000);
       } else {
-        setStatus(result.error || "Login failed. Please try again.");
+        showToast(result.error || "Login failed. Please try again.", "error");
       }
     } catch (err) {
-      console.error(err);
-      setStatus("Unexpected error. Please try again.");
+      showToast("Unexpected error. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }

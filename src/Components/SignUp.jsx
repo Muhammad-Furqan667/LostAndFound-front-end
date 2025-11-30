@@ -5,7 +5,7 @@ import "../Styling/details.css";
 
 const REG_NO_LENGTH = 13;
 
-export default function SignUp() {
+export default function SignUp({ showToast }) {
   const [formData, setFormData] = useState({
     reg_no: "",
     name: "",
@@ -30,19 +30,19 @@ export default function SignUp() {
     // Validate registration number length
     const regNumber = formData.reg_no.trim();
     if (regNumber.length !== REG_NO_LENGTH) {
-      setStatus("Registration number must be 13 characters.");
+      showToast("Registration number must be 13 characters.", "error");
       return;
     }
 
     // Validate password match
     if (formData.password !== formData.confirmPassword) {
-      setStatus("Passwords do not match.");
+      showToast("Passwords do not match.", "error");
       return;
     }
 
     // Validate password length
     if (formData.password.length < 6) {
-      setStatus("Password must be at least 6 characters long.");
+      showToast("Password must be at least 6 characters long.", "error");
       return;
     }
 
@@ -59,7 +59,7 @@ export default function SignUp() {
       const result = await signup(userData);
 
       if (result.success) {
-        setStatus("Account created successfully! Redirecting to login...");
+        showToast("Account created successfully! Redirecting to login...", "success");
         
         // Reset form
         setFormData({
@@ -77,14 +77,13 @@ export default function SignUp() {
         }, 2000);
       } else {
         if (result.error.includes("already exists")) {
-          setStatus("This registration number is already registered. Please login.");
+          showToast("This registration number is already registered. Please login.", "error");
         } else {
-          setStatus(result.error || "Could not create account. Please try again.");
+          showToast(result.error || "Could not create account. Please try again.", "error");
         }
       }
     } catch (err) {
-      console.error(err);
-      setStatus("Unexpected error. Please try again.");
+      showToast("Unexpected error. Please try again.", "error");
     } finally {
       setIsSubmitting(false);
     }
