@@ -22,6 +22,10 @@
   gap: 2rem;
 }
 
+.signup-card {
+  align-items: stretch;
+}
+
 @media (min-width: 768px) {
   .details-card {
     flex-direction: row;
@@ -94,6 +98,10 @@
     gap: 1.5rem;
   }
 
+  .signup-card {
+    align-items: center;
+  }
+
   .details-card img {
     max-width: 100%;
     height: auto;
@@ -112,6 +120,99 @@
   
   .back-btn {
     width: 100%;
+    justify-content: center;
+  }
+
+  .signup-form {
+    width: 100%;
+  }
+}
+
+.signup-highlights {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+  color: #ccc;
+  font-size: 0.95rem;
+}
+
+.signup-highlights li {
+  margin-bottom: 0.25rem;
+}
+
+.signup-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.signup-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.signup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.95rem;
+}
+
+.field-label {
+  color: #ddd;
+  font-weight: 500;
+}
+
+.signup-field input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
+  border-radius: 0.9rem;
+  padding: 0.65rem 0.9rem;
+  color: var(--text-light);
+  outline: none;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.signup-field input:focus {
+  border-color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 1px rgba(108, 99, 255, 0.4);
+}
+
+.signup-submit {
+  margin-top: 0.5rem;
+  padding: 0.7rem 1.8rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--gradient-primary);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.signup-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(108, 99, 255, 0.6);
+}
+
+.signup-status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #9be7ff;
+}
+
+@media (max-width: 640px) {
+  .signup-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-submit {
+    width: 100%;
+    text-align: center;
     justify-content: center;
   }
 }

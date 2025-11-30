@@ -15,6 +15,7 @@
     "vite": "npm:rolldown-vite@7.1.14"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/vite": "^4.1.17",
     "react-router-dom": "^7.9.5",
     "tailwindcss": "^4.1.17"

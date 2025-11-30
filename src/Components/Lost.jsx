@@ -26,7 +26,7 @@ function sortProjects(projects, sort) {
   return arr;
 }
 
-function Lost({ search, sortOrder, projects, item }) {
+function Lost({ search, sortOrder, projects, item, isLoggedIn }) {
   const navigate = useNavigate();
 
   const filteredProjects = sortProjects(
@@ -35,6 +35,15 @@ function Lost({ search, sortOrder, projects, item }) {
     ),
     sortOrder
   );
+
+  const handleReportClick = () => {
+    if (!isLoggedIn) {
+      alert("You must be logged in to report items. Please login.");
+      navigate("/login");
+      return;
+    }
+    navigate("/report");
+  };
 
   return (
     <div className="app">
@@ -63,7 +72,7 @@ function Lost({ search, sortOrder, projects, item }) {
 
       <div className="report-section">
         <p>Didn’t find your item?</p>
-        <button className="report-btn" onClick={() => navigate("/report")}>
+        <button className="report-btn" onClick={handleReportClick}>
           {`${item}`}
         </button>
       </div>

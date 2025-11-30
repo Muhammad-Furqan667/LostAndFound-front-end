@@ -163,3 +163,36 @@
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(108, 99, 255, 0.5);
 }
+  /* CATEGORY DROPDOWN STYLING */
+/* CATEGORY DROPDOWN (Dark Glass Theme) */
+.styled-select {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  color: white;
+  font-size: 1rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+
+  /* dropdown arrow */
+  background-image: url("data:image/svg+xml;utf8,<svg fill='white' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'><polygon points='5,7 10,12 15,7'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+}
+
+.styled-select:hover {
+  background: rgba(0, 0, 0, 0.35);
+  border-color: var(--primary-color);
+}
+
+.styled-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 15px rgba(108, 99, 255, 0.25);
+}

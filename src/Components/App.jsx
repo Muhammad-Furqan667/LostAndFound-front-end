@@ -1,15 +1,22 @@
-// const API_URL = import.meta.env.VITE_API_URL;
-// const BASE_URL = import.meta.env.VITE_API_URL;
+// External API URL (commented out for local development)
+const BASE_URL = "https://lostandfound-backend-production-634d.up.railway.app";
+
+// Local backend URL
+// const BASE_URL = "http://localhost:8081";
+
 import { useState, useRef, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import Lost from "./Lost.jsx";
 import Report from "./Report.jsx";
 import ItemDetails from "./details.jsx";
 import InfoPage from "./InfoPage.jsx";
+import SignUp from "./SignUp.jsx";
+import Login from "./Login.jsx";
+import Profile from "./Profile.jsx";
+import Loader from "./loader.jsx";
+import { isAuthenticated, getUser, logout as authLogout } from "../lib/authService.js";
 import "./../Styling/App.css";
-
-const BASE_URL = "https://lostandfound-backend-production-634d.up.railway.app";
 const images = import.meta.glob("./assets/*.{png,jpg,jpeg}", {
   eager: true,
 });
@@ -28,38 +35,42 @@ export default function App() {
   const [showSearch, setShowSearch] = useState(false);
   const [lostItem, setLostProject] = useState([]);
   const [FoundItem, setFoundItem] = useState([]);
+  const [loader, setLoader] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const menuRef = useRef(null);
   const searchRef = useRef(null);
 
-  //////
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const loggedIn = isAuthenticated();
+      setIsLoggedIn(loggedIn);
+      if (loggedIn) {
+        const user = getUser();
+        setCurrentUser(user);
+      }
+    };
+    checkAuth();
+  }, []);
+
+  // Handle click outside for menu and search
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false);
       }
       if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSearch(false); // 👈 hide search input when clicked outside
+        setShowSearch(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  //////////////
-  // const fetchLostItems = () => {
-  //   fetch(`${BASE_URL}/api/lost`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       const lostWithType = data.items.map((item) => ({
-  //         ...item,
-  //         type: "lost",
-  //       }));
-  //       setLostProject(lostWithType);
-  //     })
-  //     .catch((err) => console.error(err));
-  // };
   const fetchLostItems = async () => {
     try {
+      // setLoader(true);
       const res = await fetch(`${BASE_URL}/api/lost`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
@@ -74,22 +85,33 @@ export default function App() {
         type: "lost",
       }));
       setLostProject(lostWithType);
+      // setLoader(false);
     } catch (err) {
       console.error("Error fetching lost items:", err);
     }
   };
 
-  const fetchFoundItems = () => {
-    fetch(`${BASE_URL}/api/found`)
-      .then((res) => res.json())
-      .then((data) => {
-        const lostWithType = data.items.map((item) => ({
-          ...item,
-          type: "found",
-        }));
-        setFoundItem(lostWithType);
-      })
-      .catch((err) => console.error(err));
+  const fetchFoundItems = async () => {
+    try {
+      // setLoader(true);
+      const res = await fetch(`${BASE_URL}/api/found`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+
+      const data = await res.json();
+
+      const lostWithType = data.items.map((item) => ({
+        ...item,
+        type: "found",
+      }));
+
+      setFoundItem(lostWithType);
+      // setLoader(false);
+    } catch (err) {
+      console.error("Error fetching found items:", err);
+    }
   };
 
   useEffect(() => {
@@ -108,11 +130,30 @@ export default function App() {
   };
 
   const handleReportClick = () => {
+    // Check if user is logged in before allowing report
+    if (!isLoggedIn) {
+      alert("Please login to report items");
+      navigate("/login");
+      return;
+    }
     if (item) navigate("/report");
+  };
+
+  const handleLoginSuccess = (user) => {
+    setIsLoggedIn(true);
+    setCurrentUser(user);
+  };
+
+  const handleLogout = async () => {
+    await authLogout();
+    setIsLoggedIn(false);
+    setCurrentUser(null);
+    navigate("/lost");
   };
 
   return (
     <>
+      {/* {loader && <Loader />} */}
       <header className="header">
         <div className="menu-box" ref={menuRef}>
           <div className="menu-header" onClick={() => setMenuOpen(!menuOpen)}>
@@ -120,33 +161,20 @@ export default function App() {
           </div>
           {menuOpen && (
             <div className="menu-options">
-              <button 
-                className={location.pathname === "/lost" ? "active" : ""} 
-                onClick={() => handleNavigate("/lost")}
-              >
-                📦 Lost
-              </button>
-              <button 
-                className={location.pathname === "/found" ? "active" : ""} 
-                onClick={() => handleNavigate("/found")}
-              >
-                🔍 Found
-              </button>
-              <hr style={{ border: "0", borderTop: "1px solid #eee", margin: "0.2rem 0" }} />
-              <button 
-                className={location.pathname === "/contact" ? "active" : ""} 
+              <button
+                className={location.pathname === "/contact" ? "active" : ""}
                 onClick={() => handleNavigate("/contact")}
               >
                 📞 Contact Us
               </button>
-              <button 
-                className={location.pathname === "/about" ? "active" : ""} 
+              <button
+                className={location.pathname === "/about" ? "active" : ""}
                 onClick={() => handleNavigate("/about")}
               >
                 ℹ️ About
               </button>
-              <button 
-                className={location.pathname === "/help" ? "active" : ""} 
+              <button
+                className={location.pathname === "/help" ? "active" : ""}
                 onClick={() => handleNavigate("/help")}
               >
                 ❓ Help
@@ -158,9 +186,32 @@ export default function App() {
         <div className="center-header">
           {(location.pathname === "/lost" ||
             location.pathname === "/found") && (
-            <button className="report-btn-header" onClick={handleReportClick}>
-              {item}
-            </button>
+            <div className="quick-switch">
+              <button
+                className={`switch-btn ${
+                  location.pathname === "/lost" ? "active" : ""
+                }`}
+                onClick={() => handleNavigate("/lost")}
+              >
+                Lost
+              </button>
+              <button
+                className="report-btn-header"
+                onClick={handleReportClick}
+                aria-label={item}
+                title={item}
+              >
+                +
+              </button>
+              <button
+                className={`switch-btn ${
+                  location.pathname === "/found" ? "active" : ""
+                }`}
+                onClick={() => handleNavigate("/found")}
+              >
+                Found
+              </button>
+            </div>
           )}
         </div>
         {/* ///////////////////////// */}
@@ -203,22 +254,57 @@ export default function App() {
                 <option value="descending">Sort by: Z → A</option>
               </select>
             </div>
+
+            {isLoggedIn ? (
+              <button
+                className="auth-link"
+                type="button"
+                onClick={() => navigate("/profile")}
+                style={{ 
+                  background: "#007bff",
+                  cursor: "pointer",
+                  fontWeight: "500"
+                }}
+                title="View Profile"
+              >
+                {currentUser?.name?.split(" ")[0] || "User"}
+              </button>
+            ) : (
+              <div style={{ display: "flex", gap: "0.5rem" }}>
+                <button
+                  className="auth-link"
+                  type="button"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </button>
+                <button
+                  className="auth-link"
+                  type="button"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
           </div>
+        )}
+
+        {(location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/profile") && (
+          <button
+            className="menu-header home-menu-btn"
+            type="button"
+            onClick={() => navigate("/lost")}
+            aria-label="Home"
+            title="Home"
+          >
+            🏠
+          </button>
         )}
       </header>
 
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Lost
-              search={Search}
-              sortOrder={sortOrder}
-              projects={lostItem}
-              item={item}
-            />
-          }
-        />
+        <Route path="/" element={<Navigate to="/lost" replace />} />
         <Route
           path="/lost"
           element={
@@ -227,6 +313,7 @@ export default function App() {
               sortOrder={sortOrder}
               projects={lostItem}
               item={item}
+              isLoggedIn={isLoggedIn}
             />
           }
         />
@@ -238,6 +325,7 @@ export default function App() {
               sortOrder={sortOrder}
               projects={FoundItem}
               item={item}
+              isLoggedIn={isLoggedIn}
             />
           }
         />
@@ -264,6 +352,9 @@ export default function App() {
         <Route path="/contact" element={<InfoPage title="Contact Us" />} />
         <Route path="/about" element={<InfoPage title="About Us" />} />
         <Route path="/help" element={<InfoPage title="Help Center" />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} />} />
+        <Route path="/profile" element={<Profile onLogout={handleLogout} />} />
       </Routes>
     </>
   );
