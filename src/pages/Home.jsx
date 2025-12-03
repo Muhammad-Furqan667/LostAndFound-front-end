@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import "./../Styling/lost.css";
+import "./../styles/lost.css";
 import bag from "./../assets/bag.jpeg";
 
 function sortProjects(projects, sort) {

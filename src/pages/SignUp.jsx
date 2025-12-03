@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../lib/authService";
-import "../Styling/details.css";
+import { signup } from "../services/authService";
+import "../styles/details.css";
 
 const REG_NO_LENGTH = 13;
 

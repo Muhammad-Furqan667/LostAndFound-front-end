@@ -1,10 +1,29 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Loader from "./loader";
-import { getToken } from "../lib/authService";
-import "./../Styling/found.css";
+import Loader from "../components/common/Loader.jsx";
+import { getToken, getUser } from "../services/authService";
+import supabase from "../../utils/supabase.js";
+import "./../styles/found.css";
+
+// Import category images
 import bag from "./../assets/bag.jpeg";
-const BASE_URL = "https://lostandfound-backend-production-634d.up.railway.app";
+import wallet from "./../assets/wallet.jpeg";
+import watch from "./../assets/watch.jpeg";
+
+// Category to image mapping
+const categoryImages = {
+  watch: watch,
+  wallet: wallet,
+  bag: bag,
+  others: bag,
+  // Add more mappings as needed
+  phone: bag,
+  jacket: bag,
+  shirt: bag,
+  laptop: bag,
+  cap: bag,
+  card: wallet,
+};
 
 const fileToDataUrl = (file) =>
   new Promise((resolve, reject) => {
@@ -19,7 +38,6 @@ const fileToDataUrl = (file) =>
 /////////////
 function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
   const [formData, setFormData] = useState({
-    // removed added_by - will be auto-populated from JWT token
     contact: "",
     location: "",
     name: "",
@@ -32,19 +50,6 @@ function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
 
   const navigate = useNavigate();
 
-  const buildPayload = (finalImage) => {
-    return {
-      name: formData.name.trim(),
-      description: formData.description.trim(),
-      location: formData.location.trim(),
-      contact: formData.contact.trim(),
-      date: new Date().toISOString().slice(0, 10),
-      Category: formData.Category,
-      added_by: formData.added_by,
-      imageURL: finalImage,
-    };
-  };
-
   const refreshItems = () => {
     if (item.toLowerCase() === "lost") {
       fetchLostItems();
@@ -54,58 +59,98 @@ function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
   };
 
   const handleApiSubmit = async () => {
-    const form = new FormData();
-
-    // removed added_by - backend will get it from JWT token
-    form.append("contact", formData.contact);
-    form.append("location", formData.location);
-    form.append("name", formData.name);
-    form.append("Category", formData.Category);
-    form.append("description", formData.description);
-
-    if (formData.image) {
-      form.append("imageURL", formData.image);
-    } else if (formData.Category.toLowerCase() === 'others') {
-      // If Category is Others and no image, use the bag image
-      try {
-        const response = await fetch(bag);
-        const blob = await response.blob();
-        const file = new File([blob], "bag.jpeg", { type: "image/jpeg" });
-        form.append("imageURL", file);
-      } catch (error) {
-        console.error('Error loading default bag image:', error);
-      }
-    }
-
-    const endpoint = item.toLowerCase() === "lost" ? "lost" : "found";
     const token = getToken();
+    const user = getUser();
 
-    if (!token) {
+    if (!token || !user) {
       setLoader(false);
       showToast("You must be logged in to report items. Please login.", "error");
       return;
     }
 
     try {
-      const res = await fetch(`${BASE_URL}/api/${endpoint}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: form,
-      });
+      // Convert image to base64 if provided
+      let imageURL = null;
+      
+      if (formData.image) {
+        // User uploaded an image
+        imageURL = await fileToDataUrl(formData.image);
+      } else {
+        // No image uploaded - fetch category default image from Supabase
+        console.log('🔍 Debug - Category selected:', formData.Category);
+        console.log('🔍 Debug - Fetching default image from Category_defaults table');
+        
+        try {
+          // Fetch category default image URL from Supabase category_defaults table
+          const { data: categoryData, error: categoryError } = await supabase
+            .from("category_defaults")
+            .select("default_image")
+            .eq("category", formData.Category)
+            .single();
 
-      const data = await res.json();
+          if (categoryError) {
+            console.error('❌ Error fetching category from Supabase:', categoryError);
+            console.error('❌ Error details:', {
+              message: categoryError.message,
+              code: categoryError.code,
+              details: categoryError.details,
+              hint: categoryError.hint
+            });
+            throw categoryError;
+          }
 
-      if (res.status === 401) {
-        setLoader(false);
-        showToast("Your session has expired. Please login again.", "error");
-        return;
+          if (categoryData && categoryData.default_image) {
+            imageURL = categoryData.default_image;
+            console.log('✅ Successfully fetched category default image from Supabase:', imageURL);
+          } else {
+            console.log('⚠️ No default_image found for category, using local fallback');
+            // Fallback to local images if Supabase doesn't have the image
+            const categoryKey = formData.Category.toLowerCase();
+            const defaultImage = categoryImages[categoryKey] || bag;
+            const response = await fetch(defaultImage);
+            const blob = await response.blob();
+            const fileName = `${categoryKey}.jpeg`;
+            const file = new File([blob], fileName, { type: "image/jpeg" });
+            imageURL = await fileToDataUrl(file);
+          }
+        } catch (error) {
+          console.error('❌ Error loading category image:', error);
+          // Final fallback to local bag image
+          try {
+            const response = await fetch(bag);
+            const blob = await response.blob();
+            const file = new File([blob], "bag.jpeg", { type: "image/jpeg" });
+            imageURL = await fileToDataUrl(file);
+            console.log('✅ Using local bag image as fallback');
+          } catch (fallbackError) {
+            console.error('❌ Error loading fallback image:', fallbackError);
+          }
+        }
       }
 
-      if (!res.ok) {
+      // Prepare data for Supabase
+      const itemData = {
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        location: formData.location.trim(),
+        contact: formData.contact.trim(),
+        date: new Date().toISOString().slice(0, 10),
+        Category: formData.Category,
+        added_by: user.reg_no, // Use reg_no from authenticated user
+        imageURL: imageURL,
+      };
+
+      // Insert into appropriate table (lost or found)
+      const tableName = item.toLowerCase() === "lost" ? "lost" : "found";
+      const { data, error } = await supabase
+        .from(tableName)
+        .insert([itemData])
+        .select();
+
+      if (error) {
         setLoader(false);
-        showToast("Error adding item: " + (data.error || "Unknown error"), "error");
+        showToast("Error adding item: " + error.message, "error");
+        console.error("Supabase error:", error);
         return;
       }
 
@@ -115,7 +160,7 @@ function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
       navigate(item.toLowerCase() === "lost" ? "/lost" : "/found");
     } catch (err) {
       setLoader(false);
-      showToast("Failed to connect to server. Please try again.", "error");
+      showToast("Failed to add item. Please try again.", "error");
       console.error("Error adding item:", err);
     }
   };

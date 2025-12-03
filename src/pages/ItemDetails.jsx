@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import "./../Styling/details.css";
+import "./../styles/details.css";
 import bag from "./../assets/bag.jpeg";
 
 function ItemDetails({ projects }) {

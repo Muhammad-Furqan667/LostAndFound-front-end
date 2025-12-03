@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../lib/authService";
-import "../Styling/details.css";
+import { login } from "../services/authService";
+import "../styles/details.css";
 
 export default function Login({ onLoginSuccess, showToast }) {
   const [formData, setFormData] = useState({
@@ -27,12 +27,12 @@ export default function Login({ onLoginSuccess, showToast }) {
 
       if (result.success) {
         showToast("Login successful! Redirecting...", "success");
-        
+
         // Notify parent component about successful login
         if (onLoginSuccess) {
           onLoginSuccess(result.user);
         }
-        
+
         // Redirect to home after a short delay
         setTimeout(() => {
           navigate("/lost");
@@ -95,7 +95,7 @@ export default function Login({ onLoginSuccess, showToast }) {
           >
             {isSubmitting ? "Logging in..." : "Login"}
           </button>
-          
+
           {status && <p className="signup-status">{status}</p>}
 
           <div style={{ marginTop: "1rem", textAlign: "center" }}>

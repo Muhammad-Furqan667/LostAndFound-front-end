@@ -1,26 +1,36 @@
-// External API URL (commented out for local development)
-const BASE_URL = "https://lostandfound-backend-production-634d.up.railway.app";
-
-// Local backend URL
-// const BASE_URL = "http://localhost:8081";
-
 import { useState, useRef, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import Lost from "./Lost.jsx";
-import Report from "./Report.jsx";
-import ItemDetails from "./details.jsx";
-import InfoPage from "./InfoPage.jsx";
-import SignUp from "./SignUp.jsx";
-import Login from "./Login.jsx";
-import Profile from "./Profile.jsx";
-import Loader from "./loader.jsx";
-import Toast from "./Toast.jsx";
-import { isAuthenticated, getUser, logout as authLogout } from "../lib/authService.js";
-import "./../Styling/App.css";
+
+// Pages
+import Home from "./pages/Home.jsx";
+import ReportItem from "./pages/ReportItem.jsx";
+import ItemDetails from "./pages/ItemDetails.jsx";
+import InfoPage from "./pages/InfoPage.jsx";
+import SignUp from "./pages/SignUp.jsx";
+import Login from "./pages/Login.jsx";
+import Profile from "./pages/Profile.jsx";
+
+// Components
+import Loader from "./components/common/Loader.jsx";
+import Toast from "./components/common/Toast.jsx";
+
+// Services & Utils
+import {
+  isAuthenticated,
+  getUser,
+  logout as authLogout,
+} from "./services/authService.js";
+import supabase from "../utils/supabase.js";
+
+// Styles
+import "./styles/App.css";
+
+// Assets
 const images = import.meta.glob("./assets/*.{png,jpg,jpeg}", {
   eager: true,
 });
+
 const img = Object.fromEntries(
   Object.entries(images).map(([path, module]) => {
     const fileName = path.split("/").pop().split(".")[0];
@@ -34,7 +44,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [item, setItem] = useState("Report Lost Item");
   const [showSearch, setShowSearch] = useState(false);
-  const [lostItem, setLostProject] = useState([]);
+  const [lostItem, setlostItem] = useState([]);
   const [FoundItem, setFoundItem] = useState([]);
   const [loader, setLoader] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -81,43 +91,41 @@ export default function App() {
   const fetchLostItems = async () => {
     try {
       setLoader(true);
-      const res = await fetch(`${BASE_URL}/api/lost`);
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
+      const { data: lostItem, error } = await supabase
+        .from("lost")
+        .select("*")
+        .order("created_at", { ascending: false }); // Newest first
+
+      if (error) {
+        throw new Error(`HTTP error! Status: ${res.status}`);
       }
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Expected JSON but received HTML");
+
+      if (lostItem.length > 0) {
+        setlostItem(lostItem);
       }
-      const data = await res.json();
-      const lostWithType = data.items.map((item) => ({
-        ...item,
-        type: "lost",
-      }));
-      setLostProject(lostWithType);
+
       setLoader(false);
     } catch (err) {
-      console.error("Error fetching lost items:", err);
+      console.error("Error fetching found items:", err);
     }
   };
 
   const fetchFoundItems = async () => {
     try {
       setLoader(true);
-      const res = await fetch(`${BASE_URL}/api/found`);
+      const { data: FoundItem, error } = await supabase
+        .from("found")
+        .select("*")
+        .order("created_at", { ascending: false }); // Newest first
 
-      if (!res.ok) {
+      if (error) {
         throw new Error(`HTTP error! Status: ${res.status}`);
       }
 
-      const data = await res.json();
+      if (FoundItem.length > 0) {
+        setFoundItem(FoundItem);
+      }
 
-      const lostWithType = data.items.map((item) => ({
-        ...item,
-        type: "found",
-      }));
-
-      setFoundItem(lostWithType);
       setLoader(false);
     } catch (err) {
       console.error("Error fetching found items:", err);
@@ -165,11 +173,7 @@ export default function App() {
     <>
       {loader && <Loader />}
       {toast.show && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={closeToast}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
       <header className="header">
         <div className="menu-box" ref={menuRef}>
@@ -277,10 +281,10 @@ export default function App() {
                 className="auth-link"
                 type="button"
                 onClick={() => navigate("/profile")}
-                style={{ 
+                style={{
                   background: "#007bff",
                   cursor: "pointer",
-                  fontWeight: "500"
+                  fontWeight: "500",
                 }}
                 title="View Profile"
               >
@@ -307,7 +311,9 @@ export default function App() {
           </div>
         )}
 
-        {(location.pathname === "/signup" || location.pathname === "/login" || location.pathname === "/profile") && (
+        {(location.pathname === "/signup" ||
+          location.pathname === "/login" ||
+          location.pathname === "/profile") && (
           <button
             className="menu-header home-menu-btn"
             type="button"
@@ -325,7 +331,7 @@ export default function App() {
         <Route
           path="/lost"
           element={
-            <Lost
+            <Home
               search={Search}
               sortOrder={sortOrder}
               projects={lostItem}
@@ -338,7 +344,7 @@ export default function App() {
         <Route
           path="/found"
           element={
-            <Lost
+            <Home
               search={Search}
               sortOrder={sortOrder}
               projects={FoundItem}
@@ -359,8 +365,8 @@ export default function App() {
         <Route
           path="/report"
           element={
-            <Report
-              setProject={setLostProject}
+            <ReportItem
+              setProject={setlostItem}
               setFoundItem={setFoundItem}
               item={item == "Report Lost Item" ? "Lost" : "Found"}
               fetchLostItems={fetchLostItems}
@@ -373,8 +379,16 @@ export default function App() {
         <Route path="/about" element={<InfoPage title="About Us" />} />
         <Route path="/help" element={<InfoPage title="Help Center" />} />
         <Route path="/signup" element={<SignUp showToast={showToast} />} />
-        <Route path="/login" element={<Login onLoginSuccess={handleLoginSuccess} showToast={showToast} />} />
-        <Route path="/profile" element={<Profile onLogout={handleLogout} showToast={showToast} />} />
+        <Route
+          path="/login"
+          element={
+            <Login onLoginSuccess={handleLoginSuccess} showToast={showToast} />
+          }
+        />
+        <Route
+          path="/profile"
+          element={<Profile onLogout={handleLogout} showToast={showToast} />}
+        />
       </Routes>
     </>
   );

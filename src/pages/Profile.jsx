@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { logout, getUser } from "../lib/authService";
-import "../Styling/details.css";
+import { logout, getUser } from "../services/authService";
+import "../styles/details.css";
 
 export default function Profile({ onLogout, showToast }) {
   const navigate = useNavigate();

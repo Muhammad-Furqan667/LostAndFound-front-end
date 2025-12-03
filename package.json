@@ -17,6 +17,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.86.0",
     "@tailwindcss/vite": "^4.1.17",
+    "bcryptjs": "^3.0.3",
     "react-router-dom": "^7.9.5",
     "tailwindcss": "^4.1.17"
   }
