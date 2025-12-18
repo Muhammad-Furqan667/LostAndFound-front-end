@@ -101,9 +101,9 @@ function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
 
           if (categoryData && categoryData.default_image) {
             imageURL = categoryData.default_image;
-            console.log('✅ Successfully fetched category default image from Supabase:', imageURL);
+            console.log(' Successfully fetched category default image from Supabase:', imageURL);
           } else {
-            console.log('⚠️ No default_image found for category, using local fallback');
+            console.log(' No default_image found for category, using local fallback');
             // Fallback to local images if Supabase doesn't have the image
             const categoryKey = formData.Category.toLowerCase();
             const defaultImage = categoryImages[categoryKey] || bag;
@@ -114,7 +114,7 @@ function Report({ item, fetchLostItems, fetchFoundItems, showToast }) {
             imageURL = await fileToDataUrl(file);
           }
         } catch (error) {
-          console.error('❌ Error loading category image:', error);
+          console.error('Error loading category image:', error);
           // Final fallback to local bag image
           try {
             const response = await fetch(bag);

@@ -89,52 +89,115 @@ export default function App() {
   }, []);
 
   const fetchLostItems = async () => {
+    const startTime = performance.now();
     try {
+      console.log("Fetching lost items...");
       setLoader(true);
-      const { data: lostItem, error } = await supabase
+      
+      // Get IDs first
+      const { data: ids, error: idsError } = await supabase
         .from("lost")
-        .select("*")
-        .order("created_at", { ascending: false }); // Newest first
+        .select("id")
+        .order("created_at", { ascending: false });
 
-      if (error) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
+      if (idsError) {
+        console.error("Error fetching IDs:", idsError);
+        throw new Error(idsError.message || "Failed to fetch lost items");
       }
 
-      if (lostItem.length > 0) {
-        setlostItem(lostItem);
-      }
+      console.log(`Found ${ids?.length || 0} lost item records. Fetching individually in parallel...`);
 
+      // Fetch all records individually in parallel (faster than sequential)
+      const fetchPromises = ids.map(({ id }) => 
+        supabase
+          .from("lost")
+          .select("*")
+          .eq("id", id)
+          .single()
+          .then(({ data, error }) => ({ data, error, id }))
+      );
+
+      const results = await Promise.all(fetchPromises);
+      
+      const validItems = [];
+      const corruptedIds = [];
+      
+      results.forEach(({ data, error, id }) => {
+        if (error) {
+          console.error(` Error at ID ${id}:`, error.message);
+          corruptedIds.push(id);
+        } else if (data) {
+          validItems.push(data);
+        }
+      });
+
+      const endTime = performance.now();
+      console.log(`\n=== FETCH SUMMARY ===`);
+      console.log(`Valid records: ${validItems.length}`);
+      console.log(`Corrupted records: ${corruptedIds.length}`);
+      if (corruptedIds.length > 0) {
+        console.log(`Corrupted IDs: ${corruptedIds.join(", ")}`);
+      }
+      console.log(`Time taken: ${(endTime - startTime).toFixed(2)}ms`);
+      console.log(`====================\n`);
+      
+      setlostItem(validItems);
       setLoader(false);
+      
+      if (corruptedIds.length > 0) {
+        showToast(`Loaded ${validItems.length} items. ${corruptedIds.length} corrupted record(s) skipped`, "warning");
+      }
     } catch (err) {
-      console.error("Error fetching found items:", err);
+      console.error("Error fetching lost items:", err);
+      showToast(err.message || "Failed to load lost items", "error");
+      setLoader(false);
     }
   };
 
   const fetchFoundItems = async () => {
+    const startTime = performance.now();
     try {
+      console.log("Fetching found items...");
       setLoader(true);
+      
       const { data: FoundItem, error } = await supabase
         .from("found")
         .select("*")
-        .order("created_at", { ascending: false }); // Newest first
+        .order("created_at", { ascending: false });
 
       if (error) {
-        throw new Error(`HTTP error! Status: ${res.status}`);
+        console.error("Supabase error:", error);
+        throw new Error(error.message || "Failed to fetch found items");
       }
 
-      if (FoundItem.length > 0) {
-        setFoundItem(FoundItem);
-      }
-
+      const endTime = performance.now();
+      console.log(`Found items fetched: ${FoundItem?.length || 0} items in ${(endTime - startTime).toFixed(2)}ms`);
+      
+      setFoundItem(FoundItem || []);
       setLoader(false);
     } catch (err) {
       console.error("Error fetching found items:", err);
+      showToast(err.message || "Failed to load found items", "error");
+      setLoader(false);
     }
   };
 
   useEffect(() => {
-    fetchLostItems();
-    fetchFoundItems();
+    let isMounted = true;
+    
+    const fetchData = async () => {
+      if (isMounted) {
+        setLoader(true);
+        await Promise.all([fetchLostItems(), fetchFoundItems()]);
+        if (isMounted) setLoader(false);
+      }
+    };
+    
+    fetchData();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const navigate = useNavigate();
@@ -169,13 +232,33 @@ export default function App() {
     navigate("/lost");
   };
 
+  // Scroll Logic
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY.current && currentScrollY > 50) {
+        setShowHeader(false); // Scrolling down & moved past 50px
+      } else {
+        setShowHeader(true); // Scrolling up
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
     <>
       {loader && <Loader />}
       {toast.show && (
         <Toast message={toast.message} type={toast.type} onClose={closeToast} />
       )}
-      <header className="header">
+      <header className={`header ${!showHeader ? "header-hidden" : ""}`}>
         <div className="menu-box" ref={menuRef}>
           <div className="menu-header" onClick={() => setMenuOpen(!menuOpen)}>
             ☰ Menu

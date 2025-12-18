@@ -13,7 +13,7 @@ const Toast = ({ message, type, onClose }) => {
   return (
     <div className={`toast toast-${type}`}>
       <div className="toast-content">
-        {type === "success" ? "✅" : "❌"} {message}
+        {type === "success" ? "✅" : type === "warning" ? "⚠️" : "❌"} {message}
       </div>
       <button className="toast-close" onClick={onClose}>
         ×

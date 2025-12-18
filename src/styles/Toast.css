@@ -26,6 +26,11 @@
   border-left: 5px solid #b91c1c;
 }
 
+.toast-warning {
+  background-color: #f59e0b; /* Amber 500 */
+  border-left: 5px solid #d97706;
+}
+
 .toast-content {
   display: flex;
   align-items: center;

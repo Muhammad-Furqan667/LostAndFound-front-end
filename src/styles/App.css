@@ -14,7 +14,7 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 1rem 5%;
+  padding: 0.75rem 3%; /* Reduced padding */
   background: var(--glass-bg);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -24,6 +24,12 @@
   z-index: 1000;
   box-shadow: var(--glass-shadow);
   box-sizing: border-box;
+  transition: transform 0.3s ease-in-out; /* Slide animation */
+}
+
+/* Hidden state for scroll */
+.header.header-hidden {
+  transform: translateY(-100%);
 }
 
 /* Menu */
@@ -35,7 +41,7 @@
 .menu-header {
   background: var(--gradient-primary);
   color: white;
-  padding: 0.6rem 1.2rem;
+  padding: 0.5rem 1rem; /* Compact */
   border-radius: 2rem;
   font-weight: 500;
   cursor: pointer;
@@ -44,6 +50,7 @@
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
+  font-size: 0.95rem;
 }
 
 .menu-header:hover {
@@ -114,13 +121,13 @@
 .report-btn-header {
   background: var(--gradient-primary);
   color: #fff;
-  width: 60px;
-  height: 60px;
-  min-width: 60px;
-  min-height: 60px;
+  width: 48px; /* Reduced from 60px */
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   border: none;
   border-radius: 50%;
-  font-size: 2rem  !important;
+  font-size: 1.6rem !important; /* Reduced */
   font-weight: 700;
   line-height: 1;
   cursor: pointer;
@@ -140,9 +147,9 @@
 .quick-switch {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.09);
-  padding: 0.35rem 0.75rem 0.45rem;
+  padding: 0.25rem 0.5rem 0.35rem; /* Compact */
   border-radius: 999px;
   border: 1px solid var(--glass-border);
   flex-wrap: nowrap;
@@ -153,12 +160,13 @@
   background: transparent;
   border: none;
   color: var(--text-light);
-  padding: 0.45rem 0.9rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
+  font-size: 0.95rem;
 }
 
 .quick-switch .switch-btn.active {
@@ -176,7 +184,7 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: -10px;
+  bottom: -8px;
   width: 65%;
   height: 3px;
   background: var(--accent-color, #fff);
@@ -185,22 +193,16 @@
 }
 
 @keyframes flash-underline {
-  0% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.2;
-  }
-  100% {
-    opacity: 1;
-  }
+  0% { opacity: 1; }
+  50% { opacity: 0.2; }
+  100% { opacity: 1; }
 }
 
 /* Search & Sort */
 .search-container {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.8rem;
 }
 
 .auth-link {
@@ -211,7 +213,8 @@
   cursor: pointer;
   letter-spacing: 0.5px;
   transition: color 0.2s, border-color 0.2s;
-  margin-left: 0.75rem;
+  margin-left: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .home-menu-btn {
@@ -228,8 +231,8 @@
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--glass-border);
   color: var(--text-light);
-  width: 40px;
-  height: 40px;
+  width: 36px; /* Compact */
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -244,222 +247,23 @@
   border-color: var(--primary-color);
 }
 
-.search-popup input {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
-  padding: 0.6rem 1rem;
-  border-radius: 2rem;
-  color: white;
-  outline: none;
-  width: 200px;
-  transition: width 0.3s, border-color 0.3s;
+.search-container.collapsed .search-popup {
+  display: none;
 }
 
-.search-popup input:focus {
-  border-color: var(--accent-color);
-  width: 250px;
-  background: rgba(0, 0, 0, 0.2);
-}
-
-.sort-container select {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
-  color: white;
-  padding: 0.6rem 1rem;
-  border-radius: 2rem;
-  cursor: pointer;
-  outline: none;
-}
-
-.sort-container select option {
-  background: var(--background-dark);
-  color: white;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-  .header {
-    padding: 1rem 3%;
-  }
-  
-  .search-popup input {
-    width: 180px;
-  }
-}
-
-@media (max-width: 768px) {
-  .header {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: space-between;
-  }
-  
-  .center-header {
-    position: static;
-    transform: none;
-    order: 3;
-    width: 100%;
-    margin-top: 0.5rem;
-    justify-content: center;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-.report-btn-header {
-    width: 60px;
-    height: 60px;
-    min-width: 60px;
-    min-height: 60px;
-  }
-
-  .quick-switch {
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
-  .search-container {
-    order: 2;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .auth-link {
-    order: 4;
-    margin-left: 0;
-  }
-
-  .search-popup input {
-    width: 150px;
-    background: var(--background-dark); /* Better contrast on mobile */
-  }
-  
-  .search-popup input:focus {
-    width: 100%;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    z-index: 10;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .menu-box {
-    align-self: flex-start;
-  }
-
-  .search-container {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .menu-header {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .search-icon {
-    width: 35px;
-    height: 35px;
-  }
-
-  .sort-container select {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-  }
-  .menu-options button {
-  background: transparent;
-  border: none;
-  text-align: left;
-  padding: 0.8rem 1rem;
-  cursor: pointer;
-  font-size: 0.95rem;
-  color: var(--text-dark);
-  border-radius: 0.5rem;
-  transition: background 0.2s;
-  font-weight: 500;
-}
-}
-
-.menu-options button.active {
-  background: var(--primary-color);
-  color: white;
-  font-weight: 600;
-}
-
-.menu-options button:hover {
-  background: var(--background-light);
-  color: var(--primary-color);
-}
-
-/* Center Header */
-.center-header {
+.search-popup {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.report-btn-header {
-  background: var(--gradient-primary);
-  color: white;
-  padding: 0.7rem 2rem;
-  border: none;
-  border-radius: 2rem;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all var(--transition-speed);
-  box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  white-space: nowrap;
-}
-
-.report-btn-header:hover {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 6px 20px rgba(108, 99, 255, 0.5);
-}
-
-/* Search & Sort */
-.search-container {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.search-icon {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid var(--glass-border);
-  color: var(--text-light);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  flex-shrink: 0;
-}
-
-.search-icon:hover {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
+  right: 6%;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1002;
 }
 
 .search-popup input {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--glass-border);
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 1rem;
   border-radius: 2rem;
   color: white;
   outline: none;
@@ -470,17 +274,17 @@
 .search-popup input:focus {
   border-color: var(--accent-color);
   width: 250px;
-  background: rgba(0, 0, 0, 0.2);
 }
 
 .sort-container select {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--glass-border);
   color: white;
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 0.8rem;
   border-radius: 2rem;
   cursor: pointer;
   outline: none;
+  font-size: 0.9rem;
 }
 
 .sort-container select option {
@@ -491,89 +295,126 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .header {
-    padding: 1rem 3%;
-  }
-  
-  .search-popup input {
-    width: 180px;
+    padding: 0.75rem 2%;
   }
 }
 
 @media (max-width: 768px) {
   .header {
-    padding: 1rem;
-    flex-wrap: wrap;
-    gap: 1rem;
-    justify-content: space-between;
+    padding: 0.5rem;
+    display: grid;
+    /* 3-column grid for alignment: Menu | Center | Search/Sort/Profile */
+    grid-template-columns: auto 1fr auto; 
+    align-items: center;
+    gap: 0.5rem;
   }
   
+  .menu-header {
+    font-size: 0; /* Hide 'Menu' text on mobile, just icon */
+    padding: 0.5rem;
+  }
+  .menu-header::before {
+    content: "☰";
+    font-size: 1.2rem;
+  }
+
   .center-header {
     position: static;
     transform: none;
-    order: 3;
-    width: 100%;
-    margin-top: 0.5rem;
+    display: flex;
     justify-content: center;
+    width: 100%;
+    /* Ensure it doesn't take unnecessary space */
+    min-width: 0; 
+  }
+
+  /* Compact switch on mobile */
+  .quick-switch {
+    padding: 0.15rem;
+    gap: 0.1rem;
+    /* Scale down slightly if needed */
+    transform: scale(0.9); 
+  }
+  .quick-switch .switch-btn {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
   }
 
   .report-btn-header {
-    width: 100%;
-    text-align: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 1.4rem !important;
   }
 
   .search-container {
-    order: 2;
-    flex-wrap: wrap;
-    justify-content: center;
+    justify-content: flex-end;
+    gap: 0.4rem; /* Tighten gap */
+    flex-wrap: nowrap; /* Prevent wrapping */
   }
 
-  .search-popup input {
-    width: 150px;
-    background: var(--background-dark); /* Better contrast on mobile */
+  .search-popup {
+    top: 110%;
+    right: 0;
+    transform: none;
+    width: 200px; /* Limits width */
+    max-width: 90vw;
   }
   
-  .search-popup input:focus {
+  .search-popup input {
     width: 100%;
-    position: absolute;
-    right: 0;
-    top: 45px;
-    z-index: 10;
+    background: var(--background-dark);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    font-size: 0.85rem;
+    padding: 0.5rem;
+  }
+
+  /* Make sort dropdown smaller */
+  .sort-container select {
+    max-width: 80px; /* Reduced max-width */
+    padding: 0.3rem 0.5rem; /* Reduced padding */
+    font-size: 0.75rem; /* Smaller font */
+  }
+  
+  /* Make auth/profile link smaller */
+  .auth-link {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+    margin-left: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80px; /* Truncate long names */
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .search-icon {
+    width: 32px;
+    height: 32px;
   }
 }
 
 @media (max-width: 480px) {
+  /* No need to stack columns, keep Grid but adjust size adjustments */
   .header {
-    flex-direction: column;
-    align-items: stretch;
+    gap: 0.25rem; 
   }
 
-  .menu-box {
-    align-self: flex-start;
+  .quick-switch {
+    transform: scale(0.85); /* Slightly smaller on very small screens */
   }
-
-  .search-container {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .menu-header {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .search-icon {
-    width: 35px;
-    height: 35px;
-  }
-
+  
   .sort-container select {
-    padding: 0.5rem;
-    font-size: 0.8rem;
-    max-width: 120px;
-    flex: 1;
+    max-width: 70px;
+    padding-right: 0; /* Save space */
+  }
+  
+  .auth-link {
+    max-width: 60px; /* More aggressive truncation */
   }
 }
-
 
 /* Info Page Styles */
 .info-page-container {
