@@ -53,5 +53,5 @@ Feel free to fork this repository and submit a pull request.
 
 **Muhammad Furqan and group member(Sarmad & ommamah)**  
 BS Computer Science Student 3rd Semester  
-Email: muhammadfurqan3624515@gnail.com  
+Email: muhammadfurqan3624515@gmail.com  
 Live Demo: (https://lost-and-found-front-end-pearl.vercel.app/)
