@@ -9,7 +9,7 @@ const InfoPage = ({ title }) => {
       <div className="info-card">
         <h2>{title}</h2>
         <div className="info-content">
-          {title === "Contact Us" && (
+          {title === "Contact Us" && ( // Contact-Us
             <p>
               For administrative inquiries and office support, please reach out
               to our dedicated administration team via WhatsApp at{" "}
@@ -18,7 +18,7 @@ const InfoPage = ({ title }) => {
             </p>
           )}
 
-          {title === "About Us" && (
+          {title === "About Us" && ( // About-Us
             <p>
               This comprehensive web solution is engineered by{" "}
               <strong>M-Furqan</strong> and the{" "}
